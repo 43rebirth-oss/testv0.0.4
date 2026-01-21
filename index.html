@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DF | Community</title>
+    <title>xBOARD | Community Forums</title>
     <style>
         :root {
             --bg-color: #05070a;
@@ -12,86 +12,324 @@
             --accent-color: #afe7fa;
             --text-main: #ffffff;
             --text-dim: #6d7c90;
+            --error-color: #ff4757;
         }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Segoe UI', sans-serif; margin: 0; }
-        nav { background: var(--panel-color); border-bottom: 2px solid var(--accent-color); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo-section { display: flex; align-items: center; gap: 15px; }
-        .logo { font-weight: bold; font-size: 1.5rem; color: var(--accent-color); text-transform: uppercase; text-decoration: none; font-family: monospace; }
-        .admin-btn { background: #e74c3c; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; text-decoration: none; display: none; }
-        .login-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-        .category-header { background: #16202e; border-left: 4px solid var(--accent-color); color: var(--accent-color); padding: 10px 15px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; margin-top: 20px; }
-        .forum-table { width: 100%; background: var(--panel-color); border-collapse: collapse; border: 1px solid var(--border-color); }
-        .forum-row td { padding: 15px; border-bottom: 1px solid var(--border-color); }
-        .forum-title { color: var(--accent-color); text-decoration: none; font-weight: bold; }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            font-family: 'Segoe UI', sans-serif;
+            line-height: 1.6;
+        }
+        
+        nav { 
+            background: var(--panel-color); 
+            border-bottom: 2px solid var(--accent-color); 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo-section { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
+        
+        .logo { 
+            font-weight: bold; 
+            font-size: 1.5rem; 
+            color: var(--accent-color); 
+            text-transform: uppercase; 
+            text-decoration: none; 
+            font-family: monospace;
+            transition: opacity 0.2s;
+        }
+        
+        .logo:hover {
+            opacity: 0.8;
+        }
+        
+        .admin-btn { 
+            background: #e74c3c; 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            text-decoration: none;
+            display: none;
+            transition: all 0.2s;
+        }
+        
+        .admin-btn:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-display {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+        
+        .user-display b {
+            color: var(--accent-color);
+        }
+        
+        .login-btn { 
+            background: transparent; 
+            border: 1px solid var(--accent-color); 
+            color: var(--accent-color); 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .login-btn:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .container { 
+            max-width: 1100px; 
+            margin: 20px auto; 
+            padding: 0 15px; 
+        }
+        
+        .category-header { 
+            background: #16202e; 
+            border-left: 4px solid var(--accent-color); 
+            color: var(--accent-color); 
+            padding: 12px 15px; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            margin-top: 30px;
+            margin-bottom: 0;
+        }
+        
+        .category-header:first-child {
+            margin-top: 20px;
+        }
+        
+        .forum-table { 
+            width: 100%; 
+            background: var(--panel-color); 
+            border-collapse: collapse; 
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+        
+        .forum-row td { 
+            padding: 20px; 
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+        
+        .forum-row:hover td {
+            background: rgba(175, 231, 250, 0.05);
+        }
+        
+        .forum-row:last-child td {
+            border-bottom: none;
+        }
+        
+        .forum-title { 
+            color: var(--accent-color); 
+            text-decoration: none; 
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 5px;
+            transition: color 0.2s;
+        }
+        
+        .forum-title:hover {
+            color: #d4f4ff;
+        }
+        
+        .forum-description {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+        }
+        
+        .error-message {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .container {
+                padding: 0 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <nav>
-      <div class="logo-section">
-        <a href="index.html" class="logo">x<span>BOARD</span></a>
-        <a href="admin_dashboard.html" id="admin-link" class="admin-btn">ADMIN</a>
-      </div>
-      <div style="display: flex; align-items: center; gap: 15px">
-        <span id="user-display" style="font-size: 0.9rem; color: var(--text-dim)">Guest</span>
-        <button id="auth-btn" class="login-btn">Login</button>
-      </div>
+        <div class="logo-section">
+            <a href="index.html" class="logo" aria-label="xBOARD Home">x<span>BOARD</span></a>
+            <a href="admin_dashboard.html" id="admin-link" class="admin-btn" aria-label="Admin Dashboard">ADMIN</a>
+        </div>
+        <div class="user-section">
+            <span id="user-display" class="user-display">Loading...</span>
+            <button id="auth-btn" class="login-btn" disabled>Loading...</button>
+        </div>
     </nav>
 
     <div class="container">
-      <div class="category-header">General Discussions</div>
-      <table class="forum-table">
-        <tr class="forum-row">
-          <td><a href="#" class="forum-title">Community Lounge</a><div style="color:var(--text-dim); font-size:0.8rem">Talk about anything.</div></td>
-        </tr>
-      </table>
+        <div id="error-container"></div>
+        
+        <div class="category-header">General Discussions</div>
+        <table class="forum-table">
+            <tr class="forum-row">
+                <td>
+                    <a href="#community-lounge" class="forum-title">Community Lounge</a>
+                    <div class="forum-description">Talk about anything and everything.</div>
+                </td>
+            </tr>
+            <tr class="forum-row">
+                <td>
+                    <a href="#introductions" class="forum-title">Introductions</a>
+                    <div class="forum-description">New here? Introduce yourself!</div>
+                </td>
+            </tr>
+        </table>
 
-      <div class="category-header">Development & Tech</div>
-      <table class="forum-table">
-        <tr class="forum-row">
-          <td><a href="#" class="forum-title">Coding & Scripts</a><div style="color:var(--text-dim); font-size:0.8rem">Share code projects.</div></td>
-        </tr>
-      </table>
+        <div class="category-header">Development & Tech</div>
+        <table class="forum-table">
+            <tr class="forum-row">
+                <td>
+                    <a href="#coding-scripts" class="forum-title">Coding & Scripts</a>
+                    <div class="forum-description">Share code projects and collaborate.</div>
+                </td>
+            </tr>
+            <tr class="forum-row">
+                <td>
+                    <a href="#web-development" class="forum-title">Web Development</a>
+                    <div class="forum-description">HTML, CSS, JavaScript, and frameworks.</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <script type="module">
-      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-      import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-      import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-      const firebaseConfig = {
-        apiKey: 'AIzaSyBTZmr8e_Gk9ltVEdVPOhI8Od9bD3tbrdA',
-        authDomain: 'rebornforums.firebaseapp.com',
-        projectId: 'rebornforums',
-        storageBucket: 'rebornforums.firebasestorage.app',
-        messagingSenderId: '499435360097',
-        appId: '1:499435360097:web:c5c1fc54e4c37e784b7f20',
-      };
+        const firebaseConfig = {
+            apiKey: 'AIzaSyBTZmr8e_Gk9ltVEdVPOhI8Od9bD3tbrdA',
+            authDomain: 'rebornforums.firebaseapp.com',
+            projectId: 'rebornforums',
+            storageBucket: 'rebornforums.firebasestorage.app',
+            messagingSenderId: '499435360097',
+            appId: '1:499435360097:web:c5c1fc54e4c37e784b7f20',
+        };
 
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-      onAuthStateChanged(auth, async (user) => {
         const userDisplay = document.getElementById('user-display');
         const authBtn = document.getElementById('auth-btn');
         const adminLink = document.getElementById('admin-link');
+        const errorContainer = document.getElementById('error-container');
 
-        if (user) {
-          userDisplay.innerHTML = `Logged in as: <b style="color:var(--accent-color)">${user.displayName || 'User'}</b>`;
-          authBtn.textContent = 'Logout';
-          authBtn.onclick = () => signOut(auth).then(() => window.location.reload());
-
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists() && userDoc.data().role === "Admin") {
-              adminLink.style.display = "inline-block";
-          }
-        } else {
-          userDisplay.textContent = 'Welcome, Guest';
-          authBtn.textContent = 'Login / Sign Up';
-          authBtn.onclick = () => window.location.href = 'login.html';
+        function showError(message) {
+            errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
         }
-      });
+
+        onAuthStateChanged(auth, async (user) => {
+            try {
+                if (user) {
+                    // User is logged in
+                    const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+                    userDisplay.innerHTML = `Logged in as: <b>${displayName}</b>`;
+                    authBtn.textContent = 'Logout';
+                    authBtn.disabled = false;
+                    authBtn.onclick = async () => {
+                        authBtn.disabled = true;
+                        authBtn.textContent = 'Logging out...';
+                        try {
+                            await signOut(auth);
+                            window.location.reload();
+                        } catch (error) {
+                            console.error('Logout error:', error);
+                            showError('Failed to logout. Please try again.');
+                            authBtn.disabled = false;
+                            authBtn.textContent = 'Logout';
+                        }
+                    };
+
+                    // Check if user is admin
+                    try {
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists() && userDoc.data().role === "Admin") {
+                            adminLink.style.display = "inline-block";
+                        }
+                    } catch (error) {
+                        console.error('Error checking admin status:', error);
+                    }
+                } else {
+                    // User is not logged in
+                    userDisplay.textContent = 'Welcome, Guest';
+                    authBtn.textContent = 'Login / Sign Up';
+                    authBtn.disabled = false;
+                    authBtn.onclick = () => window.location.href = 'login.html';
+                    adminLink.style.display = "none";
+                }
+            } catch (error) {
+                console.error('Auth state error:', error);
+                userDisplay.textContent = 'Error loading user';
+                authBtn.textContent = 'Login';
+                authBtn.disabled = false;
+                showError('Failed to load authentication state. Please refresh the page.');
+            }
+        });
     </script>
 </body>
 </html>
