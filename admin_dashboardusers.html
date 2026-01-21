@@ -2,35 +2,257 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - User Management</title>
     <style>
-        :root { --bg: #05070a; --panel: #12161d; --border: #1e2530; --accent: #afe7fa; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; margin: 0; height: 100vh; }
-        .sidebar { width: 250px; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; }
-        .sidebar h2 { color: var(--accent); margin-bottom: 30px; }
-        .sidebar a { display: block; color: #6d7c90; text-decoration: none; padding: 15px 10px; border-radius: 4px; }
-        .sidebar a:hover { background: var(--border); color: var(--accent); }
-        .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .add-btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; background: var(--panel); }
-        th, td { text-align: left; padding: 15px; border-bottom: 1px solid var(--border); }
-        th { color: var(--accent); text-transform: uppercase; font-size: 0.8rem; }
+        :root { 
+            --bg: #05070a; 
+            --panel: #12161d; 
+            --border: #1e2530; 
+            --accent: #afe7fa; 
+            --error: #ff4757;
+            --success: #2ed573;
+        }
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            margin: 0; 
+            height: 100vh; 
+        }
+        .sidebar { 
+            width: 250px; 
+            background: var(--panel); 
+            border-right: 1px solid var(--border); 
+            padding: 20px; 
+        }
+        .sidebar h2 { 
+            color: var(--accent); 
+            margin-bottom: 30px; 
+        }
+        .sidebar a { 
+            display: block; 
+            color: #6d7c90; 
+            text-decoration: none; 
+            padding: 15px 10px; 
+            border-radius: 4px; 
+            transition: all 0.2s;
+        }
+        .sidebar a:hover { 
+            background: var(--border); 
+            color: var(--accent); 
+        }
+        .sidebar a[aria-current="page"] {
+            color: white;
+            background: var(--border);
+        }
+        .main { 
+            flex: 1; 
+            padding: 40px; 
+            overflow-y: auto; 
+        }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+        .add-btn { 
+            background: var(--accent); 
+            color: #000; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.2s;
+        }
+        .add-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .add-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: var(--panel); 
+        }
+        th, td { 
+            text-align: left; 
+            padding: 15px; 
+            border-bottom: 1px solid var(--border); 
+        }
+        th { 
+            color: var(--accent); 
+            text-transform: uppercase; 
+            font-size: 0.8rem; 
+        }
+        .loading-row td {
+            text-align: center;
+            color: #6d7c90;
+            padding: 40px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6d7c90;
+        }
+        .delete-btn {
+            color: var(--error);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 5px 10px;
+            transition: all 0.2s;
+        }
+        .delete-btn:hover {
+            background: rgba(255, 71, 87, 0.1);
+            border-radius: 4px;
+        }
+        .delete-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
         /* Modal Styles */
-        #addModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
-        .modal-content { background: var(--panel); width: 350px; margin: 100px auto; padding: 30px; border: 1px solid var(--accent); border-radius: 8px; text-align: center; }
-        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; box-sizing: border-box; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.8); 
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content { 
+            background: var(--panel); 
+            width: 90%;
+            max-width: 400px;
+            padding: 30px; 
+            border: 1px solid var(--accent); 
+            border-radius: 8px; 
+        }
+        .modal-content h2 {
+            color: var(--accent);
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #6d7c90;
+            font-size: 0.9rem;
+        }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px; 
+            background: #000; 
+            border: 1px solid var(--border); 
+            color: white; 
+            box-sizing: border-box;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .form-group .error-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        .form-group.has-error input {
+            border-color: var(--error);
+        }
+        .form-group.has-error .error-message {
+            display: block;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-cancel {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #6d7c90;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-cancel:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .btn-save {
+            flex: 1;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--panel);
+            border: 1px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.show {
+            display: block;
+        }
+        .toast.success {
+            border-color: var(--success);
+        }
+        .toast.error {
+            border-color: var(--error);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>ADMIN PANEL</h2>
-        <nav>
+        <nav aria-label="Admin navigation">
             <a href="admin_dashboard.html">Dashboard</a>
-            <a href="admin_dashboardusers.html" style="color:white; background: var(--border);">User Management</a>
-            <a href="#">Forum Categories</a>
-            <a href="#">Security Logs</a>
-            <a href="#">Settings</a>
+            <a href="admin_dashboardusers.html" aria-current="page">User Management</a>
+            <a href="#forum-categories">Forum Categories</a>
+            <a href="#security-logs">Security Logs</a>
+            <a href="#settings">Settings</a>
             <a href="index.html">Exit to Site</a>
         </nav>
     </div>
@@ -38,23 +260,63 @@
     <div class="main">
         <div class="header">
             <h1>User Management</h1>
-            <button class="add-btn" id="openModalBtn">+ ADD USER</button>
+            <button class="add-btn" id="openModalBtn" aria-label="Add new user">+ ADD USER</button>
         </div>
         <table>
-            <thead><tr><th>Username / ID</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
-            <tbody id="userTable"></tbody>
+            <thead>
+                <tr>
+                    <th>Username / ID</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                <tr class="loading-row">
+                    <td colspan="4">Loading users...</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 
-    <div id="addModal">
+    <!-- Add User Modal -->
+    <div id="addModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
         <div class="modal-content">
-            <h2 style="color:var(--accent)">New User</h2>
-            <input type="text" id="newUsername" placeholder="Username / Account ID">
-            <input type="email" id="newEmail" placeholder="Email Address">
-            <button class="add-btn" id="saveUserBtn" style="width:100%">Save to Database</button>
-            <button id="closeModalBtn" style="background:none; border:none; color:gray; cursor:pointer; margin-top:15px;">Cancel</button>
+            <h2 id="modalTitle">Add New User</h2>
+            <form id="userForm" novalidate>
+                <div class="form-group" id="usernameGroup">
+                    <label for="newUsername">Username / Account ID *</label>
+                    <input 
+                        type="text" 
+                        id="newUsername" 
+                        placeholder="Enter username"
+                        required
+                        maxlength="50"
+                        aria-required="true"
+                    >
+                    <div class="error-message">Username is required (3-50 characters)</div>
+                </div>
+                
+                <div class="form-group" id="emailGroup">
+                    <label for="newEmail">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="newEmail" 
+                        placeholder="user@example.com (optional)"
+                    >
+                    <div class="error-message">Please enter a valid email address</div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="closeModalBtn">Cancel</button>
+                    <button type="submit" class="btn-save" id="saveUserBtn">Save User</button>
+                </div>
+            </form>
         </div>
     </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -64,60 +326,202 @@
             apiKey: 'AIzaSyBTZmr8e_Gk9ltVEdVPOhI8Od9bD3tbrdA',
             authDomain: 'rebornforums.firebaseapp.com',
             projectId: 'rebornforums',
+            storageBucket: 'rebornforums.firebasestorage.app',
+            messagingSenderId: '499435360097',
             appId: '1:499435360097:web:c5c1fc54e4c37e784b7f20',
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Modal Logic
+        // DOM Elements
         const modal = document.getElementById('addModal');
-        document.getElementById('openModalBtn').onclick = () => modal.style.display = 'block';
-        document.getElementById('closeModalBtn').onclick = () => modal.style.display = 'none';
+        const userForm = document.getElementById('userForm');
+        const usernameInput = document.getElementById('newUsername');
+        const emailInput = document.getElementById('newEmail');
+        const usernameGroup = document.getElementById('usernameGroup');
+        const emailGroup = document.getElementById('emailGroup');
+        const saveBtn = document.getElementById('saveUserBtn');
+
+        // Utility Functions
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function validateEmail(email) {
+            if (!email) return true; // Optional field
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validateUsername(username) {
+            return username && username.trim().length >= 3 && username.trim().length <= 50;
+        }
+
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+
+        // Modal Controls
+        document.getElementById('openModalBtn').onclick = () => {
+            modal.classList.add('active');
+            usernameInput.focus();
+        };
+
+        document.getElementById('closeModalBtn').onclick = () => {
+            modal.classList.remove('active');
+            userForm.reset();
+            usernameGroup.classList.remove('has-error');
+            emailGroup.classList.remove('has-error');
+        };
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                document.getElementById('closeModalBtn').click();
+            }
+        });
+
+        // Real-time validation
+        usernameInput.addEventListener('input', () => {
+            const isValid = validateUsername(usernameInput.value);
+            if (isValid) {
+                usernameGroup.classList.remove('has-error');
+            }
+        });
+
+        emailInput.addEventListener('input', () => {
+            const isValid = validateEmail(emailInput.value);
+            if (isValid) {
+                emailGroup.classList.remove('has-error');
+            }
+        });
 
         // Load Users
         async function refreshTable() {
-            const snap = await getDocs(collection(db, "users"));
             const tbody = document.getElementById('userTable');
-            tbody.innerHTML = "";
-            snap.forEach(u => {
-                const data = u.data();
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${data.username}</td>
-                    <td>${data.email}</td>
-                    <td>${data.role}</td>
-                    <td><button class="del-btn" data-id="${u.id}" style="color:#ff4757; background:none; border:none; cursor:pointer;">Delete</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
+            tbody.innerHTML = '<tr class="loading-row"><td colspan="4">Loading users...</td></tr>';
+            
+            try {
+                const snapshot = await getDocs(collection(db, "users"));
+                tbody.innerHTML = "";
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No users found. Add your first user!</div></td></tr>';
+                    return;
+                }
+                
+                snapshot.forEach(userDoc => {
+                    const data = userDoc.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${sanitizeInput(data.username || 'N/A')}</td>
+                        <td>${sanitizeInput(data.email || 'N/A')}</td>
+                        <td>${sanitizeInput(data.role || 'User')}</td>
+                        <td>
+                            <button 
+                                class="delete-btn" 
+                                data-id="${userDoc.id}"
+                                data-username="${sanitizeInput(data.username || 'this user')}"
+                                aria-label="Delete ${sanitizeInput(data.username || 'user')}"
+                            >
+                                Delete
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
 
-            // Attach delete events
-            document.querySelectorAll('.del-btn').forEach(btn => {
-                btn.onclick = async () => {
-                    if(confirm("Delete this user?")) {
-                        await deleteDoc(doc(db, "users", btn.dataset.id));
-                        refreshTable();
-                    }
-                };
-            });
+                // Attach delete events
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.onclick = async (e) => {
+                        const button = e.target;
+                        const username = button.dataset.username;
+                        
+                        if (confirm(`Are you sure you want to delete "${username}"?\n\nThis action cannot be undone.`)) {
+                            button.disabled = true;
+                            button.textContent = 'Deleting...';
+                            
+                            try {
+                                await deleteDoc(doc(db, "users", button.dataset.id));
+                                showToast(`User "${username}" deleted successfully`, 'success');
+                                refreshTable();
+                            } catch (error) {
+                                console.error('Delete error:', error);
+                                showToast('Failed to delete user. Please try again.', 'error');
+                                button.disabled = false;
+                                button.textContent = 'Delete';
+                            }
+                        }
+                    };
+                });
+            } catch (error) {
+                console.error('Error loading users:', error);
+                tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state" style="color: var(--error);">Error loading users. Please refresh the page.</div></td></tr>';
+                showToast('Failed to load users', 'error');
+            }
         }
 
         // Save User
-        document.getElementById('saveUserBtn').onclick = async () => {
-            const username = document.getElementById('newUsername').value;
-            const email = document.getElementById('newEmail').value;
-            if(!username) return alert("Enter a username.");
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const email = emailInput.value.trim();
+            
+            // Validate
+            let isValid = true;
+            
+            if (!validateUsername(username)) {
+                usernameGroup.classList.add('has-error');
+                isValid = false;
+            } else {
+                usernameGroup.classList.remove('has-error');
+            }
+            
+            if (email && !validateEmail(email)) {
+                emailGroup.classList.add('has-error');
+                isValid = false;
+            } else {
+                emailGroup.classList.remove('has-error');
+            }
+            
+            if (!isValid) {
+                showToast('Please fix the errors before saving', 'error');
+                return;
+            }
+            
+            // Save to database
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            try {
+                await addDoc(collection(db, "users"), {
+                    username: sanitizeInput(username),
+                    email: email ? sanitizeInput(email) : "N/A",
+                    role: "User",
+                    createdAt: new Date().toISOString()
+                });
+                
+                modal.classList.remove('active');
+                userForm.reset();
+                showToast(`User "${username}" added successfully`, 'success');
+                refreshTable();
+            } catch (error) {
+                console.error('Save error:', error);
+                showToast('Failed to add user. Please try again.', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save User';
+            }
+        });
 
-            await addDoc(collection(db, "users"), {
-                username: username,
-                email: email || "N/A",
-                role: "User"
-            });
-            modal.style.display = 'none';
-            refreshTable();
-        };
-
+        // Initial load
         refreshTable();
     </script>
 </body>
