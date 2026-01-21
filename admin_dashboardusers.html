@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - User Management</title>
+    <style>
+        :root { --bg: #05070a; --panel: #12161d; --border: #1e2530; --accent: #afe7fa; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; margin: 0; height: 100vh; }
+        .sidebar { width: 250px; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; }
+        .sidebar h2 { color: var(--accent); margin-bottom: 30px; }
+        .sidebar a { display: block; color: #6d7c90; text-decoration: none; padding: 15px 10px; border-radius: 4px; }
+        .sidebar a:hover { background: var(--border); color: var(--accent); }
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .add-btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; background: var(--panel); }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid var(--border); }
+        th { color: var(--accent); text-transform: uppercase; font-size: 0.8rem; }
+        /* Modal Styles */
+        #addModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
+        .modal-content { background: var(--panel); width: 350px; margin: 100px auto; padding: 30px; border: 1px solid var(--accent); border-radius: 8px; text-align: center; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--border); color: white; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>ADMIN PANEL</h2>
+        <nav>
+            <a href="admin_dashboard.html">Dashboard</a>
+            <a href="admin_dashboardusers.html" style="color:white; background: var(--border);">User Management</a>
+            <a href="#">Forum Categories</a>
+            <a href="#">Security Logs</a>
+            <a href="#">Settings</a>
+            <a href="index.html">Exit to Site</a>
+        </nav>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1>User Management</h1>
+            <button class="add-btn" id="openModalBtn">+ ADD USER</button>
+        </div>
+        <table>
+            <thead><tr><th>Username / ID</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody id="userTable"></tbody>
+        </table>
+    </div>
+
+    <div id="addModal">
+        <div class="modal-content">
+            <h2 style="color:var(--accent)">New User</h2>
+            <input type="text" id="newUsername" placeholder="Username / Account ID">
+            <input type="email" id="newEmail" placeholder="Email Address">
+            <button class="add-btn" id="saveUserBtn" style="width:100%">Save to Database</button>
+            <button id="closeModalBtn" style="background:none; border:none; color:gray; cursor:pointer; margin-top:15px;">Cancel</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: 'AIzaSyBTZmr8e_Gk9ltVEdVPOhI8Od9bD3tbrdA',
+            authDomain: 'rebornforums.firebaseapp.com',
+            projectId: 'rebornforums',
+            appId: '1:499435360097:web:c5c1fc54e4c37e784b7f20',
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Modal Logic
+        const modal = document.getElementById('addModal');
+        document.getElementById('openModalBtn').onclick = () => modal.style.display = 'block';
+        document.getElementById('closeModalBtn').onclick = () => modal.style.display = 'none';
+
+        // Load Users
+        async function refreshTable() {
+            const snap = await getDocs(collection(db, "users"));
+            const tbody = document.getElementById('userTable');
+            tbody.innerHTML = "";
+            snap.forEach(u => {
+                const data = u.data();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${data.username}</td>
+                    <td>${data.email}</td>
+                    <td>${data.role}</td>
+                    <td><button class="del-btn" data-id="${u.id}" style="color:#ff4757; background:none; border:none; cursor:pointer;">Delete</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Attach delete events
+            document.querySelectorAll('.del-btn').forEach(btn => {
+                btn.onclick = async () => {
+                    if(confirm("Delete this user?")) {
+                        await deleteDoc(doc(db, "users", btn.dataset.id));
+                        refreshTable();
+                    }
+                };
+            });
+        }
+
+        // Save User
+        document.getElementById('saveUserBtn').onclick = async () => {
+            const username = document.getElementById('newUsername').value;
+            const email = document.getElementById('newEmail').value;
+            if(!username) return alert("Enter a username.");
+
+            await addDoc(collection(db, "users"), {
+                username: username,
+                email: email || "N/A",
+                role: "User"
+            });
+            modal.style.display = 'none';
+            refreshTable();
+        };
+
+        refreshTable();
+    </script>
+</body>
+</html>

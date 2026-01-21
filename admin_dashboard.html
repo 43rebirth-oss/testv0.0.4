@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; background: #05070a; color: white; }
+        .sidebar { width: 250px; background: #12161d; border-right: 1px solid #1e2530; padding: 20px; }
+        .sidebar a { display: block; color: #6d7c90; padding: 15px; text-decoration: none; }
+        .sidebar a:hover { color: #afe7fa; background: #1e2530; }
+        .main { flex: 1; padding: 30px; }
+        .card { background: #12161d; border: 1px solid #1e2530; padding: 20px; border-radius: 8px; display: inline-block; min-width: 200px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2 style="color:#afe7fa">ADMIN</h2>
+        <nav>
+            <a href="admin_dashboard.html" style="color:white; background:#1e2530">Dashboard</a>
+            <a href="admin_dashboardusers.html">User Management</a>
+            <a href="#">Forum Categories</a>
+            <a href="#">Security Logs</a>
+            <a href="#">Settings</a>
+            <a href="index.html">Exit</a>
+        </nav>
+    </div>
+    <div class="main">
+        <h1>Overview</h1>
+        <div class="card"><h3 style="color:#afe7fa">Total Users</h3><p id="count">--</p></div>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        const firebaseConfig = {
+            apiKey: 'AIzaSyBTZmr8e_Gk9ltVEdVPOhI8Od9bD3tbrdA',
+            authDomain: 'rebornforums.firebaseapp.com',
+            projectId: 'rebornforums',
+            appId: '1:499435360097:web:c5c1fc54e4c37e784b7f20',
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const snap = await getDocs(collection(db, "users"));
+        document.getElementById('count').innerText = snap.size;
+    </script>
+</body>
+</html>

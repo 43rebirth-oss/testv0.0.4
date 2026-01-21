@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>DF | Sign Up</title>
+    <style>
+      body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #05070a; margin: 0; }
+      .signup-container { background: #12161d; padding: 2.5rem; border-radius: 12px; border: 1px solid #afe7fa; width: 340px; text-align: center; }
+      h2 { color: #afe7fa; text-transform: uppercase; letter-spacing: 2px; }
+      input { width: 100%; padding: 12px; margin: 10px 0; background: #1e2530; border: 1px solid #1e2530; border-radius: 6px; color: white; box-sizing: border-box; outline: none; }
+      input:focus { border-color: #afe7fa; }
+      .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+      .btn-primary { background: #afe7fa; color: #05070a; }
+      .btn-mullvad { background: transparent; border: 1px solid #afe7fa; color: #afe7fa; margin-top: 20px; }
+      .btn:hover { opacity: 0.8; box-shadow: 0 0 10px #afe7fa; }
+      .divider { margin: 20px 0; color: #6d7c90; font-size: 0.8rem; text-transform: uppercase; }
+      .back-link { display: block; margin-top: 20px; font-size: 0.85rem; color: #6d7c90; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+      <h2>Register</h2>
+      <input type="email" id="email" placeholder="Email Address" />
+      <input type="password" id="password" placeholder="Password" />
+      <button type="button" class="btn btn-primary" id="signupBtn">Sign Up with Email</button>
+
+      <div class="divider">OR</div>
+      <button type="button" class="btn btn-mullvad" id="mullvadBtn">Generate Account ID</button>
+      
+      <a href="login.html" class="back-link">Back to Login</a>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+      import { getAuth, createUserWithEmailAndPassword, updateProfile, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+      import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBTZmr8e_Gk9ltVEdVPOhI8Od9bD3tbrdA',
+        authDomain: 'rebornforums.firebaseapp.com',
+        projectId: 'rebornforums',
+        storageBucket: 'rebornforums.firebasestorage.app',
+        messagingSenderId: '499435360097',
+        appId: '1:499435360097:web:c5c1fc54e4c37e784b7f20',
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // Email Registration
+      document.getElementById('signupBtn').addEventListener('click', async () => {
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+          if(!email || !password) return alert("Please fill in all fields.");
+
+          try {
+              const cred = await createUserWithEmailAndPassword(auth, email, password);
+              const username = email.split('@')[0];
+              await updateProfile(cred.user, { displayName: username });
+              await setDoc(doc(db, "users", cred.user.uid), {
+                  username: username,
+                  email: email,
+                  role: "User",
+                  method: "email"
+              });
+              window.location.href = "index.html";
+          } catch (err) { alert(err.message); }
+      });
+
+      // Mullvad Registration (Account Number)
+      document.getElementById('mullvadBtn').addEventListener('click', async () => {
+          const accNumber = Array.from({length: 12}, () => Math.floor(Math.random() * 10)).join('');
+          try {
+              const cred = await signInAnonymously(auth);
+              await updateProfile(cred.user, { displayName: accNumber });
+              await setDoc(doc(db, "users", cred.user.uid), {
+                  username: accNumber,
+                  email: "N/A",
+                  role: "User",
+                  method: "mullvad"
+              });
+              alert("YOUR ACCOUNT ID: " + accNumber + "\nWrite this down! You will need it to login.");
+              window.location.href = "index.html";
+          } catch (err) { alert(err.message); }
+      });
+    </script>
+</body>
+</html>

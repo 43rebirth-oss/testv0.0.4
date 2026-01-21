@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Login</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f0f2f5;
+        margin: 0;
+      }
+      .login-container {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        width: 320px;
+        text-align: center;
+      }
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+      }
+      input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .back-link {
+        display: block;
+        margin-top: 15px;
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>Admin Portal</h2>
+      <input type="email" id="email" placeholder="Admin Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button type="button" id="loginBtn">Log In</button>
+      <a href="index.html" class="back-link">← Return to Site</a>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBTZmr8e_Gk9ltVEdVPOhI8Od9bD3tbrdA',
+        authDomain: 'rebornforums.firebaseapp.com',
+        projectId: 'rebornforums',
+        storageBucket: 'rebornforums.firebasestorage.app',
+        messagingSenderId: '499435360097',
+        appId: '1:499435360097:web:c5c1fc54e4c37e784b7f20',
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      document
+        .getElementById('loginBtn')
+        .addEventListener('click', async () => {
+          const email = document.getElementById('email').value;
+          const pass = document.getElementById('password').value;
+
+          try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            window.location.href = 'admin_dashboard.html';
+          } catch (err) {
+            alert('Login Failed: ' + err.message);
+          }
+        });
+    </script>
+  </body>
+</html>
